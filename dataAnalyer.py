@@ -14,20 +14,16 @@ BEARER = os.getenv('berearToken')
 def get_excel():
 
     contador = 0
-
+    pontos = '.' * (contador % 4)
     dataisrt = '2025-07-01'
     datafsrt = '2025-07-09'
 
-    # Converte strings para datetime (sem chamar strftime)
     datai = datetime.strptime(dataisrt, '%Y-%m-%d')
     dataf = datetime.strptime(datafsrt, '%Y-%m-%d')
-
+    mensagem = f"\rIniciando a coleta de dados{pontos}"
+    print(mensagem)
     while datai <= dataf:
-        # Atualiza a quantidade de pontinhos de 0 a 3
-        pontos = '.' * (contador % 4)
-        mensagem = f"\rIniciando a coleta de dados{pontos}"
-        sys.stdout.write(mensagem)
-        sys.stdout.flush()
+        
 
         time.sleep(0.5)
         data_formatada = datai.strftime('%Y-%m-%d')
@@ -48,7 +44,7 @@ def get_excel():
         response = requests.post(url, headers=headers, json=payload)
 
         try:
-            response.raise_for_status()  # Verifica se a requisição foi bem-sucedida
+            response.raise_for_status()  
         except ValueError:
             print("Resposta de texto:", response.text)
 
@@ -56,18 +52,18 @@ def get_excel():
             data = response.json()
 
             for hora, lista_eventos in data.items():
-                for evento in lista_eventos:
-                    if 'ending' in evento:
-
+                for evento in lista_eventos:      
+                    if 'ending' in evento:                        
                         data_str = evento.get('beginning')
-                        data_str = evento.get('beginning')
+                        data_str = evento.get('beginning') 
+                        print(f"Adicionando items da data: {data_str}")                                    
                         eventos.append({
                             'hora': hora,
-                            'beginning': datetime.fromisoformat(evento.get('beginning')).strftime('%Y-%m-%d'),
-                            'ending': datetime.fromisoformat(evento.get('ending')).strftime('%Y-%m-%d'),
+                            'beginning': datetime.fromisoformat(evento.get('beginning')).strftime('%Y-%m-%d-%H:%M:%S'),
+                            'ending': datetime.fromisoformat(evento.get('ending')).strftime('%Y-%m-%d-%H:%M:%S'),
                             'description': evento.get('description'),
                             'url_id': evento.get('url_id'),
-                            'horas_Apontadas': (datetime.fromisoformat(evento.get('ending')) - datetime.fromisoformat(evento.get('beginning'))).total_seconds() / 60
+                            'horas_Apontadas': (datetime.fromisoformat(evento.get('ending')) - datetime.fromisoformat(evento.get('beginning'))).total_seconds()/60
 
                         })
 
@@ -85,14 +81,16 @@ def get_excel():
 
 def get_graph():
     
-    df = pd.read_csv("eventos.csv", usecols=['beginning', 'horas_Apontadas'])
-    df['beginning'] = pd.to_datetime(df['beginning'])
+    # df = 
+    print(pd.read_csv("eventos.csv", usecols=['beginning', 'horas_Apontadas']))
 
-    df = df.sort_values(by='beginning')
-    df.plot(x='beginning', y='horas_Apontadas', kind='line', figsize=(10, 5))
-    plt.xlabel('Data')
-    plt.ylabel('horas_Apontadas')
-    plt.show()
+    # df['beginning'] = pd.to_datetime(df['beginning'])
+
+    # df = df.sort_values(by='beginning')
+    # df.plot(x='beginning', y='horas_Apontadas', kind='line', figsize=(10, 5))
+    # plt.xlabel('Data')
+    # plt.ylabel('horas_Apontadas')
+    # plt.show()
 
 
 get_excel()
